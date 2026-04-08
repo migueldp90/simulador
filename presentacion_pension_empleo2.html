@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan de Pensiones de Empleo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --teal: #0093b4; --teal-dark: #00728c; --teal-light: #e0f4f8; --teal-xlight: #f0fafb;
+    --bg: #f5fafb; --surface: #ffffff; --border: rgba(0,147,180,0.15); --border-mid: rgba(0,147,180,0.3);
+    --text: #0d2d36; --text-muted: #4a7a87; --text-faint: #89adb5;
+    --green: #1a9e6e; --amber: #a05c10; --amber-border: #d4820f;
+    --radius: 10px; --radius-sm: 6px;
+  }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 0; font-size: 14px; line-height: 1.5; }
+
+  .header { background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 60%, #00b8d9 100%); padding: 24px 40px; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
+  .header::after { content:''; position:absolute; right:-60px; top:-60px; width:260px; height:260px; background:rgba(255,255,255,0.05); border-radius:50%; pointer-events:none; }
+  .header-left { display:flex; align-items:center; gap:20px; }
+  .logo-box { background:white; border-radius:8px; padding:8px 12px; }
+  .logo-box img { height:36px; display:block; }
+  .header-title { font-size:20px; font-weight:600; color:white; }
+  .header-right { display:flex; align-items:center; gap:16px; position:relative; z-index:1; }
+  .empresa-input { font-size:20px; font-weight:600; color:white; background:transparent; border:none; border-bottom:2px dashed rgba(255,255,255,0.5); outline:none; text-align:right; width:260px; padding-bottom:2px; font-family:inherit; }
+  .empresa-input::placeholder { color:rgba(255,255,255,0.4); }
+  .btn-fs { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:white; padding:7px 14px; border-radius:var(--radius-sm); cursor:pointer; font-family:inherit; font-size:12px; white-space:nowrap; }
+  .btn-fs:hover { background:rgba(255,255,255,0.25); }
+
+  .main { padding:28px 40px; max-width:1380px; margin:0 auto; }
+
+  /* CONTROLES */
+  .controls-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
+  .controls-left { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .pct-control { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border-mid); border-radius:var(--radius); padding:9px 14px; }
+  .pct-control label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; }
+  .pct-control input[type=number] { width:50px; font-size:18px; font-weight:600; color:var(--teal); border:none; background:transparent; outline:none; text-align:center; font-family:inherit; }
+  .pct-control span { font-size:15px; color:var(--teal); font-weight:600; }
+  .sep { width:1px; height:32px; background:var(--border-mid); }
+  .btn-add { background:var(--teal); color:white; border:none; padding:10px 18px; border-radius:var(--radius-sm); cursor:pointer; font-family:inherit; font-size:13px; font-weight:500; white-space:nowrap; }
+  .btn-add:hover { background:var(--teal-dark); }
+
+  /* BARRA PROPORCIONAL */
+  .prop-bar-wrap { display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border-mid); border-radius:var(--radius); padding:9px 14px; min-width:260px; }
+  .prop-bar-wrap label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; }
+  .prop-bar-inner { flex:1; display:flex; flex-direction:column; gap:4px; }
+  .prop-bar { height:6px; border-radius:3px; overflow:hidden; display:flex; }
+  .prop-bar div { transition:width 0.3s; }
+  .prop-labels { display:flex; justify-content:space-between; font-size:10px; }
+
+  /* TABLA */
+  .table-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:20px; box-shadow:0 1px 4px rgba(0,147,180,0.07); overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  thead tr { background:var(--teal-xlight); }
+  th { padding:10px 12px; font-weight:500; font-size:10px; color:var(--teal-dark); text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border-mid); white-space:nowrap; text-align:right; }
+  th:first-child { text-align:left; }
+  /* Separadores de grupo en cabecera */
+  th.grp-trab { color:#185FA5; border-left:2px solid rgba(24,95,165,0.2); }
+  th.grp-emp  { color:var(--green); border-left:2px solid rgba(26,158,110,0.2); }
+  tbody tr { border-bottom:1px solid var(--border); }
+  tbody tr:hover { background:var(--teal-xlight); }
+  td { padding:9px 12px; text-align:right; vertical-align:middle; }
+  td:first-child { text-align:left; }
+  td.grp-trab { border-left:2px solid rgba(24,95,165,0.12); }
+  td.grp-emp  { border-left:2px solid rgba(26,158,110,0.12); }
+  .cell-input { border:none; background:transparent; font-size:13px; color:var(--text); outline:none; border-bottom:1px dashed var(--border-mid); font-family:inherit; }
+  .cell-input:focus { border-bottom-color:var(--teal); }
+  .badge-tramo { background:var(--teal-light); color:var(--teal-dark); font-size:11px; padding:2px 7px; border-radius:10px; font-weight:500; }
+  .val-blue  { color:#185FA5; font-weight:500; font-variant-numeric:tabular-nums; }
+  .val-green { color:var(--green); font-weight:500; font-variant-numeric:tabular-nums; }
+  .val-teal  { color:var(--teal); font-weight:500; font-variant-numeric:tabular-nums; }
+  .val-strong { font-weight:500; font-variant-numeric:tabular-nums; }
+  tfoot tr { background:var(--teal-light); border-top:2px solid var(--border-mid); }
+  tfoot td { padding:10px 12px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .btn-del { background:none; border:none; cursor:pointer; font-size:13px; color:var(--text-faint); padding:2px 6px; border-radius:4px; }
+  .btn-del:hover { color:#c0392b; }
+
+  /* RESÚMENES */
+  .summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  .summary-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; box-shadow:0 1px 4px rgba(0,147,180,0.07); }
+  .sc-title { font-size:11px; font-weight:500; color:var(--teal-dark); text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:7px; }
+  .sc-title::before { content:''; display:inline-block; width:3px; height:12px; background:var(--teal); border-radius:2px; flex-shrink:0; }
+  .sc-row { display:flex; justify-content:space-between; align-items:baseline; padding:7px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .sc-row:last-child { border-bottom:none; }
+  .sc-label { color:var(--text-muted); }
+  .sc-val { font-weight:500; font-variant-numeric:tabular-nums; }
+  .sc-val.teal  { color:var(--teal); }
+  .sc-val.blue  { color:#185FA5; }
+  .sc-val.green { color:var(--green); font-size:16px; }
+  .sc-val.amber { color:var(--amber); font-size:16px; }
+  .nota-is { background:var(--teal-light); border-left:3px solid var(--teal); border-radius:var(--radius-sm); padding:12px 16px; font-size:12px; color:var(--teal-dark); line-height:1.6; margin-bottom:14px; }
+  .nota-legal { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 16px; font-size:11px; color:var(--text-faint); line-height:1.5; }
+  body.fs-mode .main { max-width:100%; padding:20px 2vw; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo-box"><img src="data:image/png;base64,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" alt="Logo"></div>
+    <span class="header-title">Plan de Pensiones de Empleo</span>
+  </div>
+  <div class="header-right">
+    <input class="empresa-input" id="nombre-empresa" value="Newcom S.L." placeholder="Nombre de la empresa">
+    <button class="btn-fs" onclick="toggleFS()">⛶ Pantalla completa</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="controls-bar">
+    <div class="controls-left">
+
+      <div class="pct-control">
+        <label>% Aportación s/ salario</label>
+        <input type="number" id="pct-aportacion" value="8" min="1" max="30" step="0.5">
+        <span>%</span>
+      </div>
+
+      <div class="sep"></div>
+
+      <!-- % empresa del total -->
+      <div class="pct-control">
+        <label>% que pone la empresa</label>
+        <input type="number" id="pct-empresa" value="100" min="0" max="100" step="5">
+        <span>%</span>
+      </div>
+
+      <!-- barra proporcional -->
+      <div class="prop-bar-wrap">
+        <div class="prop-bar-inner">
+          <div class="prop-bar">
+            <div id="bar-emp"  style="background:var(--green); width:100%;"></div>
+            <div id="bar-trab" style="background:#185FA5; width:0%;"></div>
+          </div>
+          <div class="prop-labels">
+            <span style="color:var(--green);" id="lbl-pct-emp">100% empresa</span>
+            <span style="color:#185FA5;"      id="lbl-pct-trab">0% trabajador</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <button class="btn-add" onclick="addRow()">+ Añadir trabajador</button>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th rowspan="2" style="text-align:left; vertical-align:bottom;">Trabajador</th>
+          <th rowspan="2" style="vertical-align:bottom;">Edad</th>
+          <th rowspan="2" style="vertical-align:bottom;">Salario bruto</th>
+          <th rowspan="2" style="vertical-align:bottom;">Total plan/año</th>
+          <th rowspan="2" style="vertical-align:bottom;">Tramo IRPF</th>
+          <!-- GRUPO TRABAJADOR -->
+          <th colspan="2" class="grp-trab" style="text-align:center; border-bottom:none; padding-bottom:4px;">Trabajador</th>
+          <!-- GRUPO EMPRESA -->
+          <th colspan="2" class="grp-emp"  style="text-align:center; border-bottom:none; padding-bottom:4px;">Empresa</th>
+          <th rowspan="2"></th>
+        </tr>
+        <tr>
+          <th class="grp-trab">Aportación/año</th>
+          <th class="grp-trab">Ahorro IRPF/año</th>
+          <th class="grp-emp">Aportación/año</th>
+          <th class="grp-emp">Deducción IS</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+      <tfoot id="tfoot"></tfoot>
+    </table>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <p class="sc-title">Resumen para la empresa</p>
+      <div class="sc-row"><span class="sc-label">Masa salarial total</span><span class="sc-val" id="res-masa">—</span></div>
+      <div class="sc-row"><span class="sc-label">Aportación empresa al plan / año</span><span class="sc-val green" id="res-aport-emp">—</span></div>
+      <div class="sc-row"><span class="sc-label">Deducción IS total / año</span><span class="sc-val teal" id="res-is">—</span></div>
+      <div class="sc-row"><span class="sc-label">Coste neto empresa tras IS</span><span class="sc-val green" id="res-neto-empresa">—</span></div>
+    </div>
+    <div class="summary-card">
+      <p class="sc-title">Resumen para los trabajadores</p>
+      <div class="sc-row"><span class="sc-label">Aportación trabajadores / año</span><span class="sc-val blue" id="res-aport-trab">—</span></div>
+      <div class="sc-row"><span class="sc-label">Ahorro IRPF trabajadores / año</span><span class="sc-val blue" id="res-ahorro-irpf">—</span></div>
+      <div class="sc-row"><span class="sc-label">Coste neto trabajadores / año</span><span class="sc-val" id="res-neto-trab">—</span></div>
+      <div class="sc-row"><span class="sc-label">Beneficio fiscal total combinado</span><span class="sc-val amber" id="res-benef-total">—</span></div>
+    </div>
+  </div>
+
+  <div class="nota-is" id="nota-is">—</div>
+  <div class="nota-legal">
+    * La aportación de la empresa está exenta de IRPF para el trabajador en el momento de recibirla. La deducción IS es del 10% para trabajadores con salario bruto ≤ 27.000€; para salarios superiores se prorrata: 10% × (aportación × 27.000 / salario). El ahorro IRPF del trabajador se calcula sobre el tramo marginal estatal (IRPF 2024), sin incluir tramo autonómico. Límite máximo de aportación: 10.000€/año por trabajador (1.500€ tramo general + 8.500€ tramo adicional empresarial).
+  </div>
+
+</div>
+
+<script>
+const TRAMOS = [
+  [0,12450,0.19,'19%'],[12450,20200,0.24,'24%'],[20200,35200,0.30,'30%'],
+  [35200,60000,0.37,'37%'],[60000,300000,0.45,'45%'],[300000,Infinity,0.47,'47%']
+];
+function getTipo(sal) {
+  const base = Math.max(0, sal - 2000);
+  for (let i = TRAMOS.length-1; i>=0; i--) if (base > TRAMOS[i][0]) return TRAMOS[i];
+  return TRAMOS[0];
+}
+function fmtEur(n) { return new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(Math.round(n))+'€'; }
+
+function calcIS(aportEmp, salario) {
+  if (salario <= 27000) return aportEmp * 0.10;
+  return aportEmp * (27000 / salario) * 0.10;
+}
+
+let workers = [
+  {nombre:'Trabajador 1', edad:45, salario:48910},
+  {nombre:'Trabajador 2', edad:38, salario:31194},
+  {nombre:'Trabajador 3', edad:52, salario:104922},
+  {nombre:'Trabajador 4', edad:29, salario:3223},
+];
+
+function renderTabla() {
+  const pctTotal = parseFloat(document.getElementById('pct-aportacion').value)/100 || 0.08;
+  const pctEmpresa = parseFloat(document.getElementById('pct-empresa').value)/100;
+  const pctTrabajador = 1 - pctEmpresa;
+
+  // Actualizar barra
+  document.getElementById('bar-emp').style.width  = (pctEmpresa*100) + '%';
+  document.getElementById('bar-trab').style.width = (pctTrabajador*100) + '%';
+  document.getElementById('lbl-pct-emp').textContent  = Math.round(pctEmpresa*100) + '% empresa';
+  document.getElementById('lbl-pct-trab').textContent = Math.round(pctTrabajador*100) + '% trabajador';
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  let totSal=0, totAportEmp=0, totAportTrab=0, totAhorroIRPF=0, totIS=0;
+
+  workers.forEach((w, i) => {
+    const aportTotal = Math.min(w.salario * pctTotal, 10000);
+    const aportEmp   = aportTotal * pctEmpresa;
+    const aportTrab  = aportTotal * pctTrabajador;
+    const [,,tipo,pctStr] = getTipo(w.salario);
+    const ahorroIRPF = aportTrab * tipo;
+    const costoNetoTrabMes = (aportTrab - ahorroIRPF) / 12;
+    const dedIS      = calcIS(aportEmp, w.salario);
+
+    totSal        += w.salario;
+    totAportEmp   += aportEmp;
+    totAportTrab  += aportTrab;
+    totAhorroIRPF += ahorroIRPF;
+    totIS         += dedIS;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><input class="cell-input" style="text-align:left;width:130px;" value="' + w.nombre + '" onchange="workers[' + i + '].nombre=this.value"></td>' +
+      '<td><input type="number" class="cell-input" style="width:36px;text-align:right;" value="' + w.edad + '" min="18" max="67" onchange="workers[' + i + '].edad=+this.value"></td>' +
+      '<td><input type="number" class="cell-input" style="width:88px;font-weight:500;text-align:right;" value="' + w.salario + '" min="0" onchange="workers[' + i + '].salario=+this.value;renderTabla();"> <span style="font-size:11px;color:var(--text-faint);">€</span></td>' +
+      '<td class="val-teal">' + fmtEur(aportTotal) + '</td>' +
+      '<td><span class="badge-tramo">' + pctStr + '</span></td>' +
+      '<td class="grp-trab val-blue">' + fmtEur(aportTrab) + '</td>' +
+      '<td class="grp-trab val-blue">' + fmtEur(ahorroIRPF) + ' <span style="font-size:10px;color:var(--text-faint);">(' + fmtEur(costoNetoTrabMes) + '/mes)</span></td>' +
+      '<td class="grp-emp val-green">' + fmtEur(aportEmp) + '</td>' +
+      '<td class="grp-emp val-green">' + fmtEur(dedIS) + '</td>' +
+      '<td><button class="btn-del" onclick="removeRow(' + i + ')" title="Eliminar">✕</button></td>';
+    tbody.appendChild(tr);
+  });
+
+  const totAportTotal    = totAportEmp + totAportTrab;
+  const costoNetoEmpresa = totAportEmp - totIS;
+  const costoNetoTrab    = totAportTrab - totAhorroIRPF;
+  const benefTotal       = totAhorroIRPF + totIS;
+
+  document.getElementById('tfoot').innerHTML =
+    '<tr>' +
+    '<td colspan="2" style="text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--teal-dark);">Totales</td>' +
+    '<td class="val-teal">' + fmtEur(totSal) + '</td>' +
+    '<td class="val-teal">' + fmtEur(totAportTotal) + '</td>' +
+    '<td></td>' +
+    '<td class="grp-trab val-blue">' + fmtEur(totAportTrab) + '</td>' +
+    '<td class="grp-trab val-blue">' + fmtEur(totAhorroIRPF) + '</td>' +
+    '<td class="grp-emp val-green">' + fmtEur(totAportEmp) + '</td>' +
+    '<td class="grp-emp val-green">' + fmtEur(totIS) + '</td>' +
+    '<td></td>' +
+    '</tr>';
+
+  document.getElementById('res-masa').textContent         = fmtEur(totSal);
+  document.getElementById('res-aport-emp').textContent    = fmtEur(totAportEmp);
+  document.getElementById('res-is').textContent           = fmtEur(totIS);
+  document.getElementById('res-neto-empresa').textContent = fmtEur(costoNetoEmpresa);
+  document.getElementById('res-aport-trab').textContent   = fmtEur(totAportTrab);
+  document.getElementById('res-ahorro-irpf').textContent  = fmtEur(totAhorroIRPF);
+  document.getElementById('res-neto-trab').textContent    = fmtEur(costoNetoTrab);
+  document.getElementById('res-benef-total').textContent  = fmtEur(benefTotal);
+
+  document.getElementById('nota-is').textContent =
+    'La empresa aporta ' + fmtEur(totAportEmp) + '/año y obtiene una deducción IS de ' + fmtEur(totIS) +
+    ' → coste neto empresa: ' + fmtEur(costoNetoEmpresa) + '/año. ' +
+    'Los trabajadores aportan ' + fmtEur(totAportTrab) + '/año y se ahorran ' + fmtEur(totAhorroIRPF) +
+    ' en IRPF → coste neto trabajadores: ' + fmtEur(costoNetoTrab) + '/año. ' +
+    'Beneficio fiscal total combinado: ' + fmtEur(benefTotal) + '/año.';
+}
+
+function addRow()     { workers.push({nombre:'Nuevo trabajador', edad:35, salario:30000}); renderTabla(); }
+function removeRow(i) { workers.splice(i,1); renderTabla(); }
+function toggleFS() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(()=>{});
+    document.body.classList.add('fs-mode');
+    document.querySelector('.btn-fs').textContent = '✕ Salir';
+  } else {
+    document.exitFullscreen();
+    document.body.classList.remove('fs-mode');
+    document.querySelector('.btn-fs').textContent = '⛶ Pantalla completa';
+  }
+}
+
+document.getElementById('pct-aportacion').addEventListener('input', renderTabla);
+document.getElementById('pct-empresa').addEventListener('input', renderTabla);
+renderTabla();
+</script>
+</body>
+</html>
